@@ -10,7 +10,7 @@ export const statsNames: StatKey[] = [
 
 export const useGlobalStats = () => {
   const index = new ApolloClient({
-    uri: 'https://index.cardinal.so/v1/graphql',
+    uri: 'https://prod-holaplex.hasura.app/v1/graphql',
     cache: new InMemoryCache({ resultCaching: false }),
   })
 
@@ -22,18 +22,18 @@ export const useGlobalStats = () => {
   >(['useGlobalStats'], async () => {
     const queryResult = await index.query({
       query: gql`
-        query GetTokenManagers {
-          q1: acc_yyzphucinf4rglfy3vlf_aggregate(
-            where: { invalidationType: { _eq: "4" } }
+        query GetCardinalClaimEvents {
+          q1: cardinal_token_managers_aggregate(
+            where: { invalidation_type: { _eq: "4" } }
           ) {
             aggregate {
               count
             }
           }
-          q2: acc_yyzphucinf4rglfy3vlf_aggregate(
-            where: { invalidationType: { _eq: "4" } }
-            distinct_on: recipientTokenAccount
-            order_by: { recipientTokenAccount: desc }
+
+          q2: cardinal_token_managers_aggregate(
+            where: { invalidation_type: { _eq: "4" } }
+            distinct_on: recipient_token_account
           ) {
             aggregate {
               count(distinct: true)
@@ -42,6 +42,7 @@ export const useGlobalStats = () => {
         }
       `,
     })
+
     const tokenManagers = queryResult.data as {
       q1?: { aggregate?: { count?: number } }
       q2?: { aggregate?: { count?: number } }
